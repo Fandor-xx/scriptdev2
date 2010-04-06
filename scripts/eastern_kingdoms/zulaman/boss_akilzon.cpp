@@ -79,7 +79,7 @@ struct MANGOS_DLL_DECL boss_akilzonAI : public ScriptedAI
     {
         m_uiStaticDisruptTimer = urand(7000, 14000);
         m_uiCallLightTimer = urand(15000, 25000);
-        m_uiGustOfWindTimer = urand(20000, 30000);
+        m_uiGustOfWindTimer = urand(20000, 25000);
         m_uiStormTimer = 50000;
         m_uiSummonEagleTimer = 65000;
         m_uiBerserkTimer = MINUTE*8*IN_MILLISECONDS;
