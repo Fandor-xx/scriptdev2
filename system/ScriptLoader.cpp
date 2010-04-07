@@ -144,7 +144,7 @@ extern void AddSC_instance_uldaman();
 extern void AddSC_boss_akilzon();                           //zulaman
 extern void AddSC_boss_halazzi();
 extern void AddSC_boss_janalai();
-extern void AddSC_boss_malacrass();
+extern void AddSC_boss_hexlord_malacrass();
 extern void AddSC_boss_nalorakk();
 extern void AddSC_instance_zulaman();
 extern void AddSC_zulaman();
@@ -548,7 +548,7 @@ void AddScripts()
     AddSC_boss_akilzon();                                   //zulaman
     AddSC_boss_halazzi();
     AddSC_boss_janalai();
-    AddSC_boss_malacrass();
+    AddSC_boss_hexlord_malacrass();
     AddSC_boss_nalorakk();
     AddSC_instance_zulaman();
     AddSC_zulaman();
