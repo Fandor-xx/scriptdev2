@@ -51,11 +51,11 @@ struct MANGOS_DLL_DECL boss_baron_geddonAI : public ScriptedAI
             return;
 
         //If we are <2% hp cast Armageddom
-        if (m_creature->GetHealthPercent() <= 2.0f)
+        if (m_creature->GetHealth()*100 / m_creature->GetMaxHealth() <= 2)
         {
             m_creature->InterruptNonMeleeSpells(true);
 
-            DoCastSpellIfCan(m_creature,SPELL_ARMAGEDDOM);
+            DoCast(m_creature,SPELL_ARMAGEDDOM);
             DoScriptText(EMOTE_SERVICE, m_creature);
             return;
         }
@@ -63,7 +63,7 @@ struct MANGOS_DLL_DECL boss_baron_geddonAI : public ScriptedAI
         //Inferno_Timer
         if (Inferno_Timer < diff)
         {
-            DoCastSpellIfCan(m_creature,SPELL_INFERNO);
+            DoCast(m_creature,SPELL_INFERNO);
             Inferno_Timer = 45000;
         }else Inferno_Timer -= diff;
 
@@ -71,7 +71,7 @@ struct MANGOS_DLL_DECL boss_baron_geddonAI : public ScriptedAI
         if (IgniteMana_Timer < diff)
         {
             if (Unit* target = SelectUnit(SELECT_TARGET_RANDOM,0))
-                DoCastSpellIfCan(target,SPELL_IGNITEMANA);
+                DoCast(target,SPELL_IGNITEMANA);
 
             IgniteMana_Timer = 30000;
         }else IgniteMana_Timer -= diff;
@@ -80,7 +80,7 @@ struct MANGOS_DLL_DECL boss_baron_geddonAI : public ScriptedAI
         if (LivingBomb_Timer < diff)
         {
             if (Unit* target = SelectUnit(SELECT_TARGET_RANDOM,0))
-                DoCastSpellIfCan(target,SPELL_LIVINGBOMB);
+                DoCast(target,SPELL_LIVINGBOMB);
 
             LivingBomb_Timer = 35000;
         }else LivingBomb_Timer -= diff;

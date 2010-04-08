@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -64,7 +64,7 @@ struct MANGOS_DLL_DECL boss_selin_fireheartAI : public ScriptedAI
             for(uint8 i = 0; i < size; ++i)
             {
                 uint64 guid = m_pInstance->GetData64(DATA_FEL_CRYSTAL);
-                debug_log("SD2: Selin: Adding Fel Crystal " UI64FMTD " to list", guid);
+                debug_log("SD2: Selin: Adding Fel Crystal %u to list", guid);
                 Crystals.push_back(guid);
             }
         }
@@ -81,6 +81,7 @@ struct MANGOS_DLL_DECL boss_selin_fireheartAI : public ScriptedAI
     uint32 FelExplosionTimer;
     uint32 DrainCrystalTimer;
     uint32 EmpowerTimer;
+	uint32 DrainManaFromCrystalTimer;
 
     bool IsDraining;
     bool DrainingCrystal;
@@ -143,7 +144,7 @@ struct MANGOS_DLL_DECL boss_selin_fireheartAI : public ScriptedAI
             if (pCrystal && pCrystal->isAlive())
             {
                 // select nearest
-                if (!CrystalChosen || m_creature->GetDistanceOrder(pCrystal, CrystalChosen, false))
+                if(!CrystalChosen || m_creature->GetDistanceOrder(pCrystal, CrystalChosen, false))
                 {
                     CrystalGUID = pCrystal->GetGUID();
                     CrystalChosen = pCrystal;               // Store a copy of pCrystal so we don't need to recreate a pointer to closest crystal for the movement and yell.
@@ -160,7 +161,7 @@ struct MANGOS_DLL_DECL boss_selin_fireheartAI : public ScriptedAI
             float x, y, z;                                  // coords that we move to, close to the crystal.
             CrystalChosen->GetClosePoint(x, y, z, m_creature->GetObjectSize(), CONTACT_DISTANCE);
 
-            m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
+			m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
             m_creature->GetMotionMaster()->MovePoint(1, x, y, z);
             DrainingCrystal = true;
         }
@@ -248,35 +249,44 @@ struct MANGOS_DLL_DECL boss_selin_fireheartAI : public ScriptedAI
 
         if (!DrainingCrystal)
         {
+			DrainManaFromCrystalTimer = 250;
             uint32 maxPowerMana = m_creature->GetMaxPower(POWER_MANA);
             if (maxPowerMana && ((m_creature->GetPower(POWER_MANA)*100 / maxPowerMana) < 10))
             {
-                if (DrainLifeTimer < diff)
-                {
-                    if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                        DoCastSpellIfCan(pTarget, SPELL_DRAIN_LIFE);
-
-                    DrainLifeTimer = 10000;
-                }else DrainLifeTimer -= diff;
-
                 // Heroic only
                 if (!m_bIsRegularMode)
                 {
-                    if (DrainManaTimer < diff)
-                    {
-                        if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1))
-                            DoCastSpellIfCan(pTarget, SPELL_DRAIN_MANA);
+					int randomDrain = urand(0, 1);
+					
+					if (DrainManaTimer < diff)
+					{
+						if(randomDrain == 0) 
+						{
+							DoCast(SelectUnit(SELECT_TARGET_RANDOM, 1), SPELL_DRAIN_MANA);
+						}
+						else
+						{
+							DoCast(SelectUnit(SELECT_TARGET_RANDOM, 0), SPELL_DRAIN_LIFE);
+						}
 
-                        DrainManaTimer = 10000;
-                    }else DrainManaTimer -= diff;
-                }
-            }
+						DrainManaTimer = 10000;
+					}else DrainManaTimer -= diff;
+				}
+				else
+				{				
+					if (DrainLifeTimer < diff)
+					{
+						DoCast(SelectUnit(SELECT_TARGET_RANDOM, 0), SPELL_DRAIN_LIFE);
+						DrainLifeTimer = 10000;
+					}else DrainLifeTimer -= diff;
+				}
+			}
 
             if (FelExplosionTimer < diff)
             {
                 if (!m_creature->IsNonMeleeSpellCasted(false))
                 {
-                    DoCastSpellIfCan(m_creature, SPELL_FEL_EXPLOSION);
+                    DoCast(m_creature, SPELL_FEL_EXPLOSION);
                     FelExplosionTimer = 2000;
                 }
             }else FelExplosionTimer -= diff;
@@ -290,9 +300,9 @@ struct MANGOS_DLL_DECL boss_selin_fireheartAI : public ScriptedAI
                     SelectNearestCrystal();
 
                     if (m_bIsRegularMode)
-                        DrainCrystalTimer = urand(20000, 25000);
-                    else
                         DrainCrystalTimer = urand(10000, 15000);
+                    else
+                        DrainCrystalTimer = urand(20000, 25000);
 
                 }else DrainCrystalTimer -= diff;
             }
@@ -301,7 +311,14 @@ struct MANGOS_DLL_DECL boss_selin_fireheartAI : public ScriptedAI
         {
             if (IsDraining)
             {
-                if (EmpowerTimer < diff)
+				Unit* CrystalChosen = Unit::GetUnit(*m_creature, CrystalGUID);
+				if (DrainManaFromCrystalTimer < diff)
+				{	
+					DoCast(CrystalChosen, 25755);
+					DrainManaFromCrystalTimer = 250;
+				}else DrainManaFromCrystalTimer -= diff;
+
+				if (EmpowerTimer < diff)
                 {
                     IsDraining = false;
                     DrainingCrystal = false;
@@ -313,7 +330,7 @@ struct MANGOS_DLL_DECL boss_selin_fireheartAI : public ScriptedAI
                         // Use Deal Damage to kill it, not setDeathState.
                         CrystalChosen->DealDamage(CrystalChosen, CrystalChosen->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
-                    CrystalGUID = 0;
+					CrystalGUID = 0;
 
                     m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());

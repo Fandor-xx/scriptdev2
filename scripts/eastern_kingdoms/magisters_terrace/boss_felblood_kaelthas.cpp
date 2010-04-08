@@ -274,6 +274,8 @@ struct MANGOS_DLL_DECL boss_felblood_kaelthasAI : public ScriptedAI
                         DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER, CAST_TRIGGERED);
                         DoCastSpellIfCan(m_creature->getVictim(), SPELL_PYROBLAST);
                         PyroblastTimer = 60000;
+						FireballTimer += 6000;
+						FlameStrikeTimer += 6000;
                     }else PyroblastTimer -= diff;
                 }
 
@@ -320,7 +322,7 @@ struct MANGOS_DLL_DECL boss_felblood_kaelthasAI : public ScriptedAI
                 }else FlameStrikeTimer -= diff;
 
                 // Below 50%
-                if (m_creature->GetHealthPercent() < 50.0f)
+                if (m_creature->GetHealth() * 2 < m_creature->GetMaxHealth())
                 {
                     m_creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                     m_creature->StopMoving();

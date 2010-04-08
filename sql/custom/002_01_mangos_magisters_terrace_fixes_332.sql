@@ -1,6 +1,6 @@
 # Spawnt die Gegner im HeroicMode
 
-update creature set spawnMask=3 where id IN (24664, 24683, 24684, 24685, 24686, 24687, 24688, 24689, 24690, 24696, 24697, 24698, 1412, 24722, 24723, 24744, 24761, 24777, 24808, 24815, 24560, 22515, 24822);
+update creature set spawnMask=3 where map=585 AND id IN (24664, 24683, 24684, 24685, 24686, 24687, 24688, 24689, 24690, 24696, 24697, 24698, 1412, 24722, 24723, 24744, 24761, 24777, 24808, 24815, 24560, 22515, 24822);
 
 # Spawnt die Gameobjects nun auch im Heroischem Modus
 
@@ -12,16 +12,12 @@ update creature_template set resistance2=1000, mechanic_immune_mask=619659263 wh
 
 #  Setzt Level und Geschwindigkeit für die Arkane Sphäre
 
-update creature_template set minlevel=73, maxlevel=73, speed_walk=0.4 where entry=24708;
+update creature_template set minlevel=73, maxlevel=73, speed_walk=0.4, speed_run=0.4 where entry=24708;
+update creature_template set minlevel=73, maxlevel=73, speed_walk=0.4, speed_run=0.4 where entry=25543;
 
 # Setzt ScriptName und UnitFlag für die Kristalle bei Felin Feuerherz
 
 update creature_template set ScriptName='mob_fel_crystal', unit_flags=33816578 where entry=25552;
-
-# Setzt eine Quest als Zugangsquest die unmöglich jemand auf OV abgeschlossen haben kann
-# Zum zurücksetzten: "update areatrigger_teleport set required_quest_done_heroic=11492 where id=4887;"
-
-update areatrigger_teleport set required_quest_done_heroic=12873 where id=4887;
 
 # Setzt Level und Fraktion des Flammenstoß-Triggers
 

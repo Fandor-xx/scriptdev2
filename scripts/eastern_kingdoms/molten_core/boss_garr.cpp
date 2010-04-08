@@ -57,14 +57,14 @@ struct MANGOS_DLL_DECL boss_garrAI : public ScriptedAI
         //AntiMagicPulse_Timer
         if (AntiMagicPulse_Timer < diff)
         {
-            DoCastSpellIfCan(m_creature,SPELL_ANTIMAGICPULSE);
+            DoCast(m_creature,SPELL_ANTIMAGICPULSE);
             AntiMagicPulse_Timer = urand(10000, 15000);
         }else AntiMagicPulse_Timer -= diff;
 
         //MagmaShackles_Timer
         if (MagmaShackles_Timer < diff)
         {
-            DoCastSpellIfCan(m_creature,SPELL_MAGMASHACKLES);
+            DoCast(m_creature,SPELL_MAGMASHACKLES);
             MagmaShackles_Timer = urand(8000, 12000);
         }else MagmaShackles_Timer -= diff;
 
@@ -92,15 +92,15 @@ struct MANGOS_DLL_DECL mob_fireswornAI : public ScriptedAI
         if (Immolate_Timer < diff)
         {
             if (Unit* target = SelectUnit(SELECT_TARGET_RANDOM,0))
-                DoCastSpellIfCan(target,SPELL_IMMOLATE);
+                DoCast(target,SPELL_IMMOLATE);
 
             Immolate_Timer = urand(5000, 10000);
         }else Immolate_Timer -= diff;
 
         //Cast Erruption and let them die
-        if (m_creature->GetHealthPercent() <= 10.0f)
+        if (m_creature->GetHealth() <= m_creature->GetMaxHealth() * 0.10)
         {
-            DoCastSpellIfCan(m_creature->getVictim(),SPELL_ERUPTION);
+            DoCast(m_creature->getVictim(),SPELL_ERUPTION);
             m_creature->setDeathState(JUST_DIED);
             m_creature->RemoveCorpse();
         }

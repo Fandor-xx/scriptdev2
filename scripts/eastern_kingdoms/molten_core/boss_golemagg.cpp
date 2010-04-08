@@ -77,7 +77,7 @@ struct MANGOS_DLL_DECL boss_golemaggAI : public ScriptedAI
         if (m_uiPyroblastTimer < uiDiff)
         {
             if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, SPELL_PYROBLAST);
+                DoCast(pTarget, SPELL_PYROBLAST);
 
             m_uiPyroblastTimer = 7*IN_MILLISECONDS;
         }
@@ -85,9 +85,9 @@ struct MANGOS_DLL_DECL boss_golemaggAI : public ScriptedAI
             m_uiPyroblastTimer -= uiDiff;
 
         // Enrage
-        if (!m_bEnraged && m_creature->GetHealthPercent() < 10.0f)
+        if (!m_bEnraged && m_creature->GetHealth()*100 < m_creature->GetMaxHealth()*10)
         {
-            DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
+            DoCast(m_creature, SPELL_ENRAGE);
             m_bEnraged = true;
         }
 
@@ -96,7 +96,7 @@ struct MANGOS_DLL_DECL boss_golemaggAI : public ScriptedAI
         {
             if (m_uiEarthquakeTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_EARTHQUAKE);
+                DoCast(m_creature->getVictim(), SPELL_EARTHQUAKE);
                 m_uiEarthquakeTimer = 3*IN_MILLISECONDS;
             }
             else
@@ -107,8 +107,8 @@ struct MANGOS_DLL_DECL boss_golemaggAI : public ScriptedAI
         // Golemagg's Trust
         if (m_uiBuffTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature, SPELL_GOLEMAGG_TRUST);
-            m_uiBuffTimer = 2.5*IN_MILLISECONDS;
+            DoCast(m_creature, SPELL_GOLEMAGG_TRUST);
+            m_uiBuffTimer = 2.5*IN_MILISECONDS;
         }
         else
             m_uiBuffTimer -= uiDiff;
@@ -136,7 +136,7 @@ struct MANGOS_DLL_DECL mob_core_ragerAI : public ScriptedAI
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage)
     {
-        if (m_creature->GetHealthPercent() < 50.0f)
+        if (m_creature->GetHealth()*100 < m_creature->GetMaxHealth()*50)
         {
             if (m_pInstance)
             {
@@ -162,7 +162,7 @@ struct MANGOS_DLL_DECL mob_core_ragerAI : public ScriptedAI
         // Mangle
         if (m_uiMangleTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_MANGLE);
+            DoCast(m_creature->getVictim(), SPELL_MANGLE);
             m_uiMangleTimer = 10*IN_MILLISECONDS;
         }
         else
