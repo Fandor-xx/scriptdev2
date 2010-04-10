@@ -88,7 +88,7 @@ struct MANGOS_DLL_DECL boss_ragnarosAI : public ScriptedAI
     boss_ragnarosAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         SetCombatMovement(false);
-        Reset();
+		Reset();
     }
 
     uint32 WrathOfRagnaros_Timer;
@@ -133,6 +133,7 @@ struct MANGOS_DLL_DECL boss_ragnarosAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
+		m_creature->SetRespawnTime(604800);
         if (WasBanished && Attack_Timer < diff)
         {
             //Become unbanished again

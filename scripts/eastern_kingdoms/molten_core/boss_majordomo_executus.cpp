@@ -36,10 +36,10 @@ EndScriptData */
 #define SAY_ARRIVAL3_RAG    -1409011
 #define SAY_ARRIVAL5_RAG    -1409012
 
-#define SPAWN_RAG_X         838.51f
-#define SPAWN_RAG_Y         -829.84f
-#define SPAWN_RAG_Z         -232.00f
-#define SPAWN_RAG_O         1.70f
+#define SPAWN_RAG_X         838.51
+#define SPAWN_RAG_Y         -829.84
+#define SPAWN_RAG_Z         -232.00
+#define SPAWN_RAG_O         1.70
 
 #define SPELL_MAGIC_REFLECTION      35158 // Spell workaround - 20619
 #define SPELL_DAMAGE_REFLECTION     35159 // Spell workaround - 21075
@@ -63,10 +63,10 @@ EndScriptData */
 #define END_Z -118.373444f
 #define END_O 2.695165f
 
-static double POS_X[8] = {764.333252, 761.579590, 759.106323, 756.124023, 772.586975, 776.704895, 779.419373, 783.828613};
-static double POS_Y[8] = {-1215.194946, -1222.640015, -1228.976318, -1237.590698, -1199.444336, -1194.604248, -1189.251953, -1181.874634};
-static double POS_Z[8] = {-119.759811, -120.066162, -119.239403, -119.537369, -119.714180, -119.977524, -120.175232, -120.492287};
-static double ORIENT[8] = {2.787323, 2.743341, 2.743341, 2.617677, 2.529712, 2.592544, 2.677367, 2.803031};
+static float POS_X[8] = {764.333252f, 761.579590f, 759.106323f, 756.124023f, 772.586975f, 776.704895f, 779.419373f, 783.828613f};
+static float POS_Y[8] = {-1215.194946f, -1222.640015f, -1228.976318f, -1237.590698f, -1199.444336f, -1194.604248f, -1189.251953f, -1181.874634f};
+static float POS_Z[8] = {-119.759811f, -120.066162f, -119.239403f, -119.537369f, -119.714180f, -119.977524f, -120.175232f, -120.492287f};
+static float ORIENT[8] = {2.787323f, 2.743341f, 2.743341f, 2.617677f, 2.529712f, 2.592544f, 2.677367f, 2.803031f};
 
 static uint32 GameObjectEntry = 179703;
 
@@ -244,10 +244,11 @@ struct MANGOS_DLL_DECL boss_majordomoAI : public ScriptedAI
 											m_creature->SetVisibility(VISIBILITY_OFF);
 											m_creature->setDeathState(JUST_DIED);
 											m_pInstance->SetData(DATA_MAJORDOMO, DONE);
-																											
+							
+																
 											Teleport_self_Timer = 4294967295;
 
-											m_creature->SummonCreature(11502, 836.980042f, -832.665222f, -232.000001f, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 99999999);
+											m_creature->SummonCreature(11502, 836.980042f, -832.665222f, -232.000001f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
 											
 										}else Teleport_self_Timer -= diff;
 
@@ -280,7 +281,7 @@ struct MANGOS_DLL_DECL boss_majordomoAI : public ScriptedAI
 					if (pTarget)
 					{
 						DoCast(pTarget, SPELL_TELEPORT);
-						DoTeleportPlayer(pTarget, 735.580322f,-1175.523804f,-119.220230f,5.683450f);
+						DoTeleportPlayer(pTarget, 735.580322f,-1175.523804f,-119.220230f, 5.683450f);
 						auraTarget = pTarget;
 					}
 				}
