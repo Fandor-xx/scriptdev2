@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -58,7 +58,7 @@ struct MANGOS_DLL_DECL boss_harbinger_skyrissAI : public ScriptedAI
     boss_harbinger_skyrissAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+		m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Intro = false;
         Reset();
     }
@@ -135,7 +135,7 @@ struct MANGOS_DLL_DECL boss_harbinger_skyrissAI : public ScriptedAI
 
         DoScriptText(SAY_IMAGE, m_creature);
 
-        DoCastSpellIfCan(m_creature, IsImage33 ? SPELL_33_ILLUSION : SPELL_66_ILLUSION);
+        DoCast(m_creature, IsImage33 ? SPELL_33_ILLUSION : SPELL_66_ILLUSION);
     }
 
     void UpdateAI(const uint32 diff)
@@ -168,6 +168,8 @@ struct MANGOS_DLL_DECL boss_harbinger_skyrissAI : public ScriptedAI
                         Intro_Timer = 3000;
                         break;
                     case 3:
+						m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+						m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                         Intro = true;
                         break;
                 }
@@ -177,13 +179,13 @@ struct MANGOS_DLL_DECL boss_harbinger_skyrissAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (!IsImage66 && m_creature->GetHealthPercent() <= 66.0f)
+        if (!IsImage66 && ((m_creature->GetHealth()*100) / m_creature->GetMaxHealth() <= 66))
         {
             IsImage66 = true;
             DoSplit();
         }
 
-        if (!IsImage33 && m_creature->GetHealthPercent() <= 33.0f)
+        if (!IsImage33 && ((m_creature->GetHealth()*100) / m_creature->GetMaxHealth() <= 33))
         {
             IsImage33 = true;
             DoSplit();
@@ -192,9 +194,9 @@ struct MANGOS_DLL_DECL boss_harbinger_skyrissAI : public ScriptedAI
         if (MindRend_Timer < diff)
         {
             if (Unit* target = SelectUnit(SELECT_TARGET_RANDOM,1))
-                DoCastSpellIfCan(target, m_bIsRegularMode ? SPELL_MIND_REND : H_SPELL_MIND_REND);
+                DoCast(target, m_bIsRegularMode ? SPELL_MIND_REND : H_SPELL_MIND_REND);
             else
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MIND_REND : H_SPELL_MIND_REND);
+                DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MIND_REND : H_SPELL_MIND_REND);
 
             MindRend_Timer = 8000;
         }else MindRend_Timer -=diff;
@@ -207,9 +209,9 @@ struct MANGOS_DLL_DECL boss_harbinger_skyrissAI : public ScriptedAI
             DoScriptText(urand(0, 1) ? SAY_FEAR_1 : SAY_FEAR_2, m_creature);
 
             if (Unit* target = SelectUnit(SELECT_TARGET_RANDOM,1))
-                DoCastSpellIfCan(target,SPELL_FEAR);
+                DoCast(target,SPELL_FEAR);
             else
-                DoCastSpellIfCan(m_creature->getVictim(),SPELL_FEAR);
+                DoCast(m_creature->getVictim(),SPELL_FEAR);
 
             Fear_Timer = 25000;
         }else Fear_Timer -=diff;
@@ -222,9 +224,9 @@ struct MANGOS_DLL_DECL boss_harbinger_skyrissAI : public ScriptedAI
             DoScriptText(urand(0, 1) ? SAY_MIND_1 : SAY_MIND_2, m_creature);
 
             if (Unit* target = SelectUnit(SELECT_TARGET_RANDOM,1))
-                DoCastSpellIfCan(target, m_bIsRegularMode ? SPELL_DOMINATION : H_SPELL_DOMINATION);
+                DoCast(target, m_bIsRegularMode ? SPELL_DOMINATION : H_SPELL_DOMINATION);
             else
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DOMINATION : H_SPELL_DOMINATION);
+                DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DOMINATION : H_SPELL_DOMINATION);
 
             Domination_Timer = urand(16000, 32000);
         }else Domination_Timer -=diff;
@@ -237,7 +239,7 @@ struct MANGOS_DLL_DECL boss_harbinger_skyrissAI : public ScriptedAI
                     return;
 
                 if (Unit* target = SelectUnit(SELECT_TARGET_RANDOM,1))
-                    DoCastSpellIfCan(target,H_SPELL_MANA_BURN);
+                    DoCast(target,H_SPELL_MANA_BURN);
 
                 ManaBurn_Timer = urand(16000, 32000);
             }else ManaBurn_Timer -=diff;
@@ -260,14 +262,31 @@ struct MANGOS_DLL_DECL boss_harbinger_skyriss_illusionAI : public ScriptedAI
     boss_harbinger_skyriss_illusionAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+		m_bIsRegluarMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
     ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    bool m_bIsRegluarMode;
+	uint32 MindRend_Illusion_Timer;
+	
+    void Reset() 
+	{
+		MindRend_Illusion_Timer = 8000;
+	}
 
-    void Reset() { }
+	void UpdateAI(const uint32 diff)
+	{
+		if (MindRend_Illusion_Timer < diff)
+		{
+			if (Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 1))
+				DoCast(target, m_bIsRegluarMode ? SPELL_MIND_REND_IMAGE : H_SPELL_MIND_REND_IMAGE);
+			else
+				DoCast(m_creature->getVictim(), m_bIsRegluarMode ? SPELL_MIND_REND_IMAGE : H_SPELL_MIND_REND_IMAGE);
+			
+			MindRend_Illusion_Timer = 8000;
+		}else MindRend_Illusion_Timer -= diff;
+	}	
 };
 
 CreatureAI* GetAI_boss_harbinger_skyriss_illusion(Creature* pCreature)

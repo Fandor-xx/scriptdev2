@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -25,6 +25,7 @@ EndScriptData */
 npc_millhouse_manastorm
 npc_warden_mellichar
 mob_zerekethvoidzone
+mob_arcatraz_sentinel
 EndContentData */
 
 #include "precompiled.h"
@@ -101,7 +102,7 @@ struct MANGOS_DLL_DECL npc_millhouse_manastormAI : public ScriptedAI
     {
         if (m_creature->Attack(pWho, true))
         {
-            m_creature->AddThreat(pWho);
+            m_creature->AddThreat(pWho, 0.0f);
             m_creature->SetInCombatWith(pWho);
             pWho->SetInCombatWith(m_creature);
 
@@ -125,6 +126,12 @@ struct MANGOS_DLL_DECL npc_millhouse_manastormAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
+		if (m_pInstance && m_pInstance->GetData(TYPE_HARBINGERSKYRISS) == DONE)
+		{
+			m_creature->SetVisibility(VISIBILITY_OFF);
+			m_creature->setDeathState(JUST_DIED);
+		}
+
         if (!Init)
         {
             if (EventProgress_Timer < diff)
@@ -143,17 +150,17 @@ struct MANGOS_DLL_DECL npc_millhouse_manastormAI : public ScriptedAI
                             break;
                         case 3:
                             DoScriptText(SAY_WATER, m_creature);
-                            DoCastSpellIfCan(m_creature,SPELL_CONJURE_WATER);
+                            DoCast(m_creature,SPELL_CONJURE_WATER);
                             EventProgress_Timer = 7000;
                             break;
                         case 4:
                             DoScriptText(SAY_BUFFS, m_creature);
-                            DoCastSpellIfCan(m_creature,SPELL_ICE_ARMOR);
+                            DoCast(m_creature,SPELL_ICE_ARMOR);
                             EventProgress_Timer = 7000;
                             break;
                         case 5:
                             DoScriptText(SAY_DRINK, m_creature);
-                            DoCastSpellIfCan(m_creature,SPELL_ARCANE_INTELLECT);
+                            DoCast(m_creature,SPELL_ARCANE_INTELLECT);
                             EventProgress_Timer = 7000;
                             break;
                         case 6:
@@ -162,7 +169,10 @@ struct MANGOS_DLL_DECL npc_millhouse_manastormAI : public ScriptedAI
                             break;
                         case 7:
                             if (m_pInstance)
-                                m_pInstance->SetData(TYPE_WARDEN_2,DONE);
+								m_pInstance->SetData(TYPE_WARDEN_2,DONE);
+
+							m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+							m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);							
                             Init = true;
                             break;
                     }
@@ -174,7 +184,7 @@ struct MANGOS_DLL_DECL npc_millhouse_manastormAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (!LowHp && m_creature->GetHealthPercent() < 20.0f)
+        if (!LowHp && ((m_creature->GetHealth()*100 / m_creature->GetMaxHealth()) < 20))
         {
             DoScriptText(SAY_LOWHP, m_creature);
             LowHp = true;
@@ -187,13 +197,13 @@ struct MANGOS_DLL_DECL npc_millhouse_manastormAI : public ScriptedAI
 
             DoScriptText(SAY_PYRO, m_creature);
 
-            DoCastSpellIfCan(m_creature->getVictim(),SPELL_PYROBLAST);
+            DoCast(m_creature->getVictim(),SPELL_PYROBLAST);
             Pyroblast_Timer = 40000;
         }else Pyroblast_Timer -=diff;
 
         if (Fireball_Timer < diff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(),SPELL_FIREBALL);
+            DoCast(m_creature->getVictim(),SPELL_FIREBALL);
             Fireball_Timer = 4000;
         }else Fireball_Timer -=diff;
 
@@ -266,7 +276,7 @@ struct MANGOS_DLL_DECL npc_warden_mellicharAI : public ScriptedAI
         Phase = 1;
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
-        DoCastSpellIfCan(m_creature,SPELL_TARGET_OMEGA);
+        DoCast(m_creature,SPELL_TARGET_OMEGA);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_HARBINGERSKYRISS,NOT_STARTED);
@@ -296,7 +306,7 @@ struct MANGOS_DLL_DECL npc_warden_mellicharAI : public ScriptedAI
     void Aggro(Unit *who)
     {
         DoScriptText(YELL_INTRO1, m_creature);
-        DoCastSpellIfCan(m_creature,SPELL_BUBBLE_VISUAL);
+        DoCast(m_creature,SPELL_BUBBLE_VISUAL);
 
         if (m_pInstance)
         {
@@ -343,19 +353,19 @@ struct MANGOS_DLL_DECL npc_warden_mellicharAI : public ScriptedAI
             switch(Phase)
             {
                 case 2:
-                    DoCastSpellIfCan(m_creature,SPELL_TARGET_ALPHA);
+                    DoCast(m_creature,SPELL_TARGET_ALPHA);
                     m_pInstance->SetData(TYPE_WARDEN_1,IN_PROGRESS);
                     break;
                 case 3:
-                    DoCastSpellIfCan(m_creature,SPELL_TARGET_BETA);
+                    DoCast(m_creature,SPELL_TARGET_BETA);
                     m_pInstance->SetData(TYPE_WARDEN_2,IN_PROGRESS);
                     break;
                 case 5:
-                    DoCastSpellIfCan(m_creature,SPELL_TARGET_DELTA);
+                    DoCast(m_creature,SPELL_TARGET_DELTA);
                     m_pInstance->SetData(TYPE_WARDEN_3,IN_PROGRESS);
                     break;
                 case 6:
-                    DoCastSpellIfCan(m_creature,SPELL_TARGET_GAMMA);
+                    DoCast(m_creature,SPELL_TARGET_GAMMA);
                     m_pInstance->SetData(TYPE_WARDEN_4,IN_PROGRESS);
                     break;
                 case 7:
@@ -383,19 +393,19 @@ struct MANGOS_DLL_DECL npc_warden_mellicharAI : public ScriptedAI
             {
                 //continue beam omega pod, unless we are about to summon skyriss
                 if (Phase != 7)
-                    DoCastSpellIfCan(m_creature,SPELL_TARGET_OMEGA);
+                    DoCast(m_creature,SPELL_TARGET_OMEGA);
 
                 switch(Phase)
                 {
                     case 2:
                         switch(urand(0, 1))
                         {
-                            case 0: m_creature->SummonCreature(ENTRY_TRICKSTER, 478.326f, -148.505f, 42.56f, 3.19f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
-                            case 1: m_creature->SummonCreature(ENTRY_PH_HUNTER, 478.326f, -148.505f, 42.56f, 3.19f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
+                            case 0: m_creature->SummonCreature(ENTRY_TRICKSTER,478.326f,-148.505f,42.56f,3.19f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
+                            case 1: m_creature->SummonCreature(ENTRY_PH_HUNTER,478.326f,-148.505f,42.56f,3.19f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
                         }
                         break;
                     case 3:
-                        m_creature->SummonCreature(ENTRY_MILLHOUSE, 413.292f, -148.378f, 42.56f, 6.27f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000);
+                        m_creature->SummonCreature(ENTRY_MILLHOUSE,413.292f,-148.378f,42.56f,6.27f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000);
                         break;
                     case 4:
                         DoScriptText(YELL_RELEASE2B, m_creature);
@@ -403,19 +413,19 @@ struct MANGOS_DLL_DECL npc_warden_mellicharAI : public ScriptedAI
                     case 5:
                         switch(urand(0, 1))
                         {
-                            case 0: m_creature->SummonCreature(ENTRY_AKKIRIS, 420.179f, -174.396f, 42.58f, 0.02f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
-                            case 1: m_creature->SummonCreature(ENTRY_SULFURON, 420.179f, -174.396f, 42.58f, 0.02f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
+                            case 0: m_creature->SummonCreature(ENTRY_AKKIRIS,420.179f,-174.396f,42.58f,0.02f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
+                            case 1: m_creature->SummonCreature(ENTRY_SULFURON,420.179f,-174.396f,42.58f,0.02f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
                         }
                         break;
                     case 6:
                         switch(urand(0, 1))
                         {
-                            case 0: m_creature->SummonCreature(ENTRY_TW_DRAK, 471.795f, -174.58f, 42.58f, 3.06f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
-                            case 1: m_creature->SummonCreature(ENTRY_BL_DRAK, 471.795f, -174.58f, 42.58f, 3.06f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
+                            case 0: m_creature->SummonCreature(ENTRY_TW_DRAK,471.795f,-174.58f,42.58f,3.06f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
+                            case 1: m_creature->SummonCreature(ENTRY_BL_DRAK,471.795f,-174.58f,42.58f,3.06f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000); break;
                         }
                         break;
                     case 7:
-                        m_creature->SummonCreature(ENTRY_SKYRISS, 445.763f, -191.639f, 44.64f, 1.60f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000);
+                        m_creature->SummonCreature(ENTRY_SKYRISS,445.763f,-191.639f,44.64f,1.60f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,600000);
                         DoScriptText(YELL_WELCOME, m_creature);
                         break;
                 }
@@ -479,15 +489,28 @@ CreatureAI* GetAI_npc_warden_mellichar(Creature* pCreature)
 struct MANGOS_DLL_DECL mob_zerekethvoidzoneAI : public ScriptedAI
 {
     mob_zerekethvoidzoneAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+	
+	uint32 Death_Timer;
 
     void Reset()
     {
+		Death_Timer = 60000;
+
         m_creature->SetUInt32Value(UNIT_NPC_FLAGS,0);
         m_creature->setFaction(16);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-        DoCastSpellIfCan(m_creature,SPELL_VOID_ZONE_DAMAGE);
+        DoCast(m_creature,SPELL_VOID_ZONE_DAMAGE);
     }
+
+	void UpdateAI(const uint32 diff)
+	{
+		if (Death_Timer < diff)
+		{
+			m_creature->setDeathState(JUST_DIED);
+			m_creature->SetVisibility(VISIBILITY_ON);
+		}else Death_Timer -= diff;
+	}
 };
 CreatureAI* GetAI_mob_zerekethvoidzoneAI(Creature* pCreature)
 {
