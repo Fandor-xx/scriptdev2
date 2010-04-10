@@ -96,11 +96,11 @@ EndScriptData */
 #define SPELL_WR_WHIRLWIND      43442
 #define SPELL_WR_SPELL_REFLECT  43443
 
-#define ORIENT                  1.5696
-#define POS_Y                   921.2795
-#define POS_Z                   33.8883
+#define ORIENT                  1.5696f
+#define POS_Y                   921.2795f
+#define POS_Z                   33.8883f
 
-static float Pos_X[4] = {127.8827, 122.8827, 112.8827, 107.8827};
+static float Pos_X[4] = {127.8827f, 122.8827f, 112.8827f, 107.8827f};
 
 static uint32 AddEntryList[8]=
 {
