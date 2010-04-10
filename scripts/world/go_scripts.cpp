@@ -38,6 +38,8 @@ go_tablet_of_madness
 go_tablet_of_the_seven
 go_tele_to_dalaran_crystal
 go_tele_to_violet_stand
+go_shaffars_stasis
+go_mana_tomb_stasis
 EndContentData */
 
 #include "precompiled.h"
@@ -420,6 +422,37 @@ bool GOHello_go_tele_to_violet_stand(Player* pPlayer, GameObject* pGo)
     return true;
 }
 
+/*######
+## go_shaffars_stasis
+######*/
+
+const uint32 uiYorEntry = 22930;
+
+bool GOHello_go_shaffars_stasis(Player* pPlayer, GameObject* pGo)
+{
+	Creature* Yor = pPlayer->SummonCreature(uiYorEntry, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetAngle(pPlayer),
+        TEMPSUMMON_TIMED_DESPAWN, 900000);
+	Yor->SetRespawnDelay(900000);
+	Yor->SetRespawnTime(900000);
+	pGo->Delete();
+    return false;
+}
+
+/*######
+## go_mana_tomb_stasis
+######*/
+
+const uint32 uiAmbassadorPaxiviEntry = 22928;
+
+bool GOHello_go_mana_tomb_stasis(Player* pPlayer, GameObject* pGo)
+{
+	pPlayer->AreaExploredOrEventHappens(10977);
+	pPlayer->SummonCreature(uiAmbassadorPaxiviEntry, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetAngle(pPlayer), TEMPSUMMON_TIMED_DESPAWN, 120000);
+	pGo->Delete();
+	
+    return false;
+}
+
 void AddSC_go_scripts()
 {
     Script *newscript;
@@ -517,5 +550,15 @@ void AddSC_go_scripts()
     newscript = new Script;
     newscript->Name = "go_tele_to_violet_stand";
     newscript->pGOHello =           &GOHello_go_tele_to_violet_stand;
+    newscript->RegisterSelf();
+
+	newscript = new Script;
+    newscript->Name = "go_shaffars_stasis";
+    newscript->pGOHello =           &GOHello_go_shaffars_stasis;
+    newscript->RegisterSelf();
+
+	newscript = new Script;
+    newscript->Name = "go_mana_tomb_stasis";
+    newscript->pGOHello =           &GOHello_go_mana_tomb_stasis;
     newscript->RegisterSelf();
 }
