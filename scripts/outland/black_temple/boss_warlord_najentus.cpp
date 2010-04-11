@@ -63,6 +63,7 @@ struct MANGOS_DLL_DECL boss_najentusAI : public ScriptedAI
     uint32 m_uiSpecialYellTimer;
     uint32 m_uiTidalShieldTimer;
     uint32 m_uiImpalingSpineTimer;
+	uint32 m_uiShieldEndTimer;
 
     bool m_bIsShielded;
 
@@ -126,6 +127,19 @@ struct MANGOS_DLL_DECL boss_najentusAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
+		if (m_uiShieldEndTimer < diff)
+		{
+			if (m_bIsShielded)
+			{
+				if (m_creature->HasAura(SPELL_TIDAL_SHIELD, EFFECT_INDEX_0))
+					m_creature->RemoveAurasDueToSpell(SPELL_TIDAL_SHIELD);
+
+				DoCastSpellIfCan(m_creature->getVictim(), SPELL_TIDAL_BURST);
+				m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(),0,0);
+				m_bIsShielded = false;
+			}
+		}else m_uiShieldEndTimer -= diff;
+
         if (m_uiEnrageTimer < diff)
         {
             if (m_creature->IsNonMeleeSpellCasted(false))
@@ -143,7 +157,7 @@ struct MANGOS_DLL_DECL boss_najentusAI : public ScriptedAI
 
             return;                                         // Don't cast or do anything while Shielded
         }
-
+		
         // Needle
         if (m_uiNeedleSpineTimer < diff)
         {
@@ -193,6 +207,7 @@ struct MANGOS_DLL_DECL boss_najentusAI : public ScriptedAI
 
             m_bIsShielded = true;
             m_uiTidalShieldTimer = 60000;
+			m_uiShieldEndTimer = 40000;
         }else m_uiTidalShieldTimer -= diff;
 
         DoMeleeAttackIfReady();

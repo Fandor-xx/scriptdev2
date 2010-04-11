@@ -146,10 +146,11 @@ bool GossipSelect_npc_zulaman_hostage(Player* player, Creature* _Creature, uint3
         pInstance->SetData(DATA_CHESTLOOTED, 0);
         float x, y, z;
         _Creature->GetPosition(x, y, z);
-        Creature* summon = _Creature->SummonCreature(HostageInfo[progress], x-2, y, z, 0, TEMPSUMMON_TIMED_DESPAWN, 300000);
-     // Creature* summon = _Creature->SummonCreature(HostageInfo[progress], x-2, y, z, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+        // Creature* summon = _Creature->SummonCreature(HostageInfo[progress], x-2, y, z, 0, TEMPSUMMON_TIMED_DESPAWN, 300000);
+		Creature* summon = _Creature->SummonCreature(HostageInfo[progress], x-2, y, z, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
         if(summon)
         {
+			summon->SetRespawnTime(400000);
             ((npc_zulaman_hostageAI*)summon->AI())->PlayerGUID = player->GetGUID();
             ((npc_zulaman_hostageAI*)summon->AI())->IsLoot = true;
             summon->SetDisplayId(10056);
